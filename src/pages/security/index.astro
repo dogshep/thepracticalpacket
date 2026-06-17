@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("posts"))
+  .filter((p) => p.data.category === "security")
+  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+---
+
+  Security
+  Security-focused articles and analyses.
+
+  
+    {posts.map((post) => (
+      <PostCard post={post} />
+    ))}
+  
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Security">
+  <h1>Security</h1>
+  <p>Focusing on Network Security</p>
+</BaseLayout>

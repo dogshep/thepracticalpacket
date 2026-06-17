@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("posts"))
+  .filter((p) => p.data.category === "how-to")
+  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+---
+
+  How-To Guides
+  Step-by-step tutorials for real-world networking.
+
+  
+    {posts.map((post) => (
+      <PostCard post={post} />
+    ))}
+  
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="How-To Guides">
+  <h1>How-To Guides</h1>
+  <p>Step-by-step tutorials for real-world networking.</p>
+</BaseLayout>

@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("posts"))
+  .filter((p) => p.data.category === "best-practices")
+  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+---
+
+  Best Practices
+  Recommended procedures and operational guidance.
+
+  
+    {posts.map((post) => (
+      <PostCard post={post} />
+    ))}
+  
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="BestPractices">
+  <h1>Best-Practices</h1>
+  <p>Solid foundations to build upon</p>
+</BaseLayout>

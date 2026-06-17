@@ -1,0 +1,13 @@
+---
+import { getCollection } from "astro:content";
+import ArticleLayout from "../../layouts/ArticleLayout.astro";
+
+const { slug } = Astro.params;
+const post = (await getCollection("posts")).find((p) => p.slug === slug);
+
+if (!post) throw new Error(`Post not found: ${slug}`);
+---
+
+<ArticleLayout frontmatter={post.data}>
+  {post.body}
+</ArticleLayout>
