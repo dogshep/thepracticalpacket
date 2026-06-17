@@ -162,14 +162,14 @@ diagnose debug application icap 255
 - Asymmetric routing & session helpers: If return path differs, some protocols may break—consider NAT or enable session helpers where appropriate.
 
 ## Common Mistakes
-- 1. No upfront SLA definition — steering without SLAs leads to poor outcomes.  
-- 2. Over‑reliance on DNS or passive metrics for failover — miss packet loss and jitter.  
-- 3. Forgetting MTU/MSS when layering IPsec — causes fragmentation and performance hits.  
-- 4. Enabling full SSL inspection without capacity planning — this can overload the FortiGate and break flows; use selective inspection and exception lists instead.  
-- 5. Putting SD‑WAN interfaces in multiple policies with conflicting actions.  
-- 6. No logging or retention policy — without historic SD‑WAN/SLA logs, intermittent failures are impossible to diagnose and capacity trends remain hidden.  
-- 7. Testing only during business hours — miss peak‑time behavior.
-- 8. Single armed SDWAN. This is a big one where people are using SDWAN, with the ability for SDWAN to pull routes from a route table, when there's nothing to fail over to. This causes a full outage if the SLA fails, instead of things just being slow.
+1. No upfront SLA definition — steering without SLAs leads to poor outcomes.
+2. Over‑reliance on DNS or passive metrics for failover — miss packet loss and jitter.
+3. Forgetting MTU/MSS when layering IPsec — causes fragmentation and performance hits.
+4. Enabling full SSL inspection without capacity planning — this can overload the FortiGate and break flows; use selective inspection and exception lists instead.
+5. Putting SD‑WAN interfaces in multiple policies with conflicting actions.
+6. No logging or retention policy — without historic SD‑WAN/SLA logs, intermittent failures are impossible to diagnose and capacity trends remain hidden.
+7. Testing only during business hours — miss peak‑time behavior.
+8. Single‑armed SD‑WAN: using SD‑WAN without a real failover target (routes exist but no alternate transport) can cause full outages when an SLA fails instead of graceful degradation.
 
 ## Validation & Testing (Checklist)
 - Configuration checks:
