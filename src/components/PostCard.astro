@@ -1,9 +1,13 @@
 ---
 const { post } = Astro.props;
 const data = post.data;
+const url = `/posts/${post.id}`;
 ---
 
-  {data.title}
-  {data.description}
-
-  {data.pubDate}
+<article class="card">
+  <a href={url} aria-label={`Read ${data.title}`}>
+    <h3>{data.title}</h3>
+    <p>{data.description}</p>
+    <time datetime={new Date(data.pubDate).toISOString()}>{new Date(data.pubDate).toLocaleDateString()}</time>
+  </a>
+</article>

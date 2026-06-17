@@ -9,18 +9,23 @@ const posts = (await getCollection("posts"))
   .slice(0, 3);
 ---
 
-  
-    The Practical Packet
-    Hands-On Networking for the Real World.
+<BaseLayout title="The Practical Packet" description="Hands-On Networking for the Real World.">
+  <section class="hero">
+    <h1>The Practical Packet</h1>
+    <p>Hands-On Networking for the Real World.</p>
     <a href="/how-to">Start Learning</a>
-  
+  </section>
 
-  
-    Featured How-To Guides
-    
+  <section>
+    <h2>Featured How-To Guides</h2>
+    <div class="posts-grid">
       {posts.map((post) => (
         <PostCard post={post} />
       ))}
-    
+    </div>
+  </section>
+
+</BaseLayout>
+
 
 

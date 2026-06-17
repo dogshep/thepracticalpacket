@@ -8,19 +8,13 @@ const posts = (await getCollection("posts"))
   .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
 ---
 
-  Security
-  Security-focused articles and analyses.
+<BaseLayout title="Security" description="Security-focused articles and analyses.">
+  <h1>Security</h1>
+  <p>Security-focused articles and analyses.</p>
 
-  
+  <section class="posts-grid">
     {posts.map((post) => (
       <PostCard post={post} />
     ))}
-  
----
-import BaseLayout from "../../layouts/BaseLayout.astro";
----
-
-<BaseLayout title="Security">
-  <h1>Security</h1>
-  <p>Focusing on Network Security</p>
+  </section>
 </BaseLayout>

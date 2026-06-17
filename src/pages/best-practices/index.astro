@@ -5,22 +5,16 @@ import { getCollection } from "astro:content";
 
 const posts = (await getCollection("posts"))
   .filter((p) => p.data.category === "best-practices")
-  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 ---
 
-  Best Practices
-  Recommended procedures and operational guidance.
+<BaseLayout title="Best Practices" description="Recommended procedures and operational guidance.">
+  <h1>Best Practices</h1>
+  <p>Recommended procedures and operational guidance.</p>
 
-  
+  <section class="posts-grid">
     {posts.map((post) => (
       <PostCard post={post} />
     ))}
-  
----
-import BaseLayout from "../../layouts/BaseLayout.astro";
----
-
-<BaseLayout title="BestPractices">
-  <h1>Best-Practices</h1>
-  <p>Solid foundations to build upon</p>
+  </section>
 </BaseLayout>

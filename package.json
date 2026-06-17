@@ -9,7 +9,16 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^8.20.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom": "^22.1.0",
+    "vitest": "^1.6.1"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.3",

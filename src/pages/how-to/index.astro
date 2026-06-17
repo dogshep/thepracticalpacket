@@ -5,22 +5,15 @@ import { getCollection } from "astro:content";
 
 const posts = (await getCollection("posts"))
   .filter((p) => p.data.category === "how-to")
-  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 ---
+<BaseLayout title="How-To Guides" description="Step-by-step tutorials for real-world networking.">
+  <h1>How-To Guides</h1>
+  <p>Step-by-step tutorials for real-world networking.</p>
 
-  How-To Guides
-  Step-by-step tutorials for real-world networking.
-
-  
+  <section class="posts-grid">
     {posts.map((post) => (
       <PostCard post={post} />
     ))}
-  
----
-import BaseLayout from "../../layouts/BaseLayout.astro";
----
-
-<BaseLayout title="How-To Guides">
-  <h1>How-To Guides</h1>
-  <p>Step-by-step tutorials for real-world networking.</p>
+  </section>
 </BaseLayout>

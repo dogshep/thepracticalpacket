@@ -8,19 +8,13 @@ const posts = (await getCollection("posts"))
   .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
 ---
 
-  Vendor
-  Vendor reviews and compatibility notes.
+<BaseLayout title="Vendors" description="Vendor reviews and compatibility notes.">
+  <h1>Vendors</h1>
+  <p>Vendor reviews and compatibility notes.</p>
 
-  
+  <section class="posts-grid">
     {posts.map((post) => (
       <PostCard post={post} />
     ))}
-  
----
-import BaseLayout from "../../layouts/BaseLayout.astro";
----
-
-<BaseLayout title="Vendors">
-  <h1>Vendors</h1>
-  <p>Vendor Specific Info</p>
+  </section>
 </BaseLayout>
