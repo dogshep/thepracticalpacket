@@ -7,7 +7,7 @@ category: "best-practices"
 
 # Fortinet SD-WAN Best Practices: How to Design, Deploy, and Optimize a Secure, High-Performance SD-WAN Fabric
 
-## Hook
+## Intro
 SD‑WAN promises simplified operations and better application performance, but many deployments deliver unpredictable failover, poor security posture, or unnecessary cost. This guide will go over what matters in SD-WAN setups, and will go over some gotchas when it comes to design and implementation. Too many times I've seen engineers draw up poor setups and cause headaches for clients.
 
 ## The Real
@@ -36,12 +36,12 @@ Realistically I don't see SD-WAN used for much more than failover, load-balancin
 - Noncritical backups → prefer low‑cost link, high loss tolerance.
 
 ### WAN Link Assessment
-- Inventory each link: bandwidth, latency, jitter, packet loss, MTU, interface type (DSL, LTE, fiber), and provider SLAs.  
-- Run active tests: iPerf for throughput, ping/traceroute for latency and path. Schedule tests at peak and off‑peak.  
+- Inventory each link: bandwidth, latency, jitter, packet loss, MTU, interface type (DSL, LTE, fiber, Coax), and provider SLAs (SLAs are especially important because the numbers promised don't matter if you can't push an ISP to fix it immediately!)  
+- Run active tests: iPerf for throughput, ping/traceroute for latency and path. Schedule tests at peak and off‑peak. This is a great way to get a baseline of each circuit. 
 - Verify MTU and MSS along the path; IPsec tunnels can reduce effective MTU—adjust MSS or enable MSS clamping.
 
 ### Performance SLAs (Define & Configure)
-- Define measurable thresholds: latency (ms), jitter (ms), packet loss (%), and minimum available bandwidth.  
+- Define measurable thresholds: latency (ms), jitter (ms), packet loss (%), and minimum available bandwidth. I've found running a search on acceptable metrics for critical business applications (e.g. VoIP) is super helpful here.  
 - Map SLAs to business intent (e.g., VoIP: latency < 40ms, jitter < 10ms, loss < 1%).  
 - FortiOS example (performance‑SLA object, example syntax varies by version):
 
@@ -49,7 +49,7 @@ Realistically I don't see SD-WAN used for much more than failover, load-balancin
 config system sdwan
   config performance-sla
     edit "sla-voip"
-      set gateway 8.8.8.8
+      set gateway 8.8.8.8 (or use the VoIP server if you have it easily available)
       set latency-threshold 40
       set jitter-threshold 10
       set packetloss-threshold 1
@@ -57,13 +57,12 @@ config system sdwan
   end
 end
 ```
-
-Note: In the GUI, navigate to Security Fabric / SD‑WAN / Performance SLA to create these objects visually.
+Note: In the GUI, navigate to Network > SD‑WAN > Performance SLA to create these objects visually.
 
 ### SD‑WAN Rules and Steering
 - Rule strategy: Top‑down, most specific first — match on application, source/destination, or DSCP, then fall back to SLA/priority.  
-- Use application awareness (FortiGate DPI) for precise steering, but be mindful of inspection CPU cost.  
-- Example: Force SIP traffic to prefer `wan1` unless `sla-voip` fails, then failover to `wan2`.
+- Use application awareness (FortiGate DPI) for precise steering, but be mindful of inspection CPU cost. Realistically I've seen full DPI in use twice, most companies do not use it because it requires client certificates on every endpoint.
+- Example: Force SIP traffic to prefer `wan1` unless `sla-voip` fails, then failover to `wan2`. Keep in mind lots of SIP traffic won't match JUST the SIP service, so you need to find exactly what your VoIP traffic matches on and use that.
 
 CLI sketch (policy‑based steering example):
 
@@ -89,11 +88,11 @@ In the GUI: Policy & Objects → IPv4 Policy, enable SD‑WAN and pick steering 
 
 ### Application Identification
 - Use built‑in application signatures first; add custom application signatures for proprietary apps.  
-- When using SSL inspection to ID traffic, consider CPU impact and privacy/compliance constraints—use selective SSL inspection.
+- When using SSL inspection to ID traffic, consider CPU impact and privacy/compliance constraints—use selective SSL inspection. Your 40F doesn't really want to do DPI, App Control, and Web/DNS security profiles on all your traffic.
 
 ### Health Checks
-- Combine active probes (ICMP/TCP) and passive metrics (session counters) for robust detection.  
-- Configure probe frequency: balance responsiveness vs. probe overhead (e.g., 3–5s for critical voice, 10–30s for general traffic).  
+- Combine active probes (ICMP/TCP) and passive metrics (session counters) for robust detection. Writing this I'm realizing I want to play with session counters more...
+- Configure probe frequency: balance responsiveness vs. probe overhead (e.g., 3–5s for critical voice, 10–30s for general traffic). Also keep in mind your fail-back check frequencies. You don't want a circuit failing back and forth every 5 seconds.
 - Example health check (ICMP):
 
 ```cli
@@ -109,23 +108,22 @@ config system sdwan
 end
 ```
 
-Tie health checks to performance SLAs so steering decisions use both path quality and reachability.
+Tie health checks to performance SLAs so steering decisions use both path quality and reachability. Using variable names such as hc-internet makes your life easier for both future scripting, and future 3am troubleshooting. It's always best to treat all designs as if you're going to have to troubleshoot them at 3am.
 
 ### Failover Behavior
 - Granularity: Failover can be interface‑level, service‑level, or application‑level—choose based on business criticality.  
 - Avoid flapping: add hysteresis and require multiple probe failures before failover.  
 - Preserve sessions when possible: For TCP sessions, prefer path pinning unless path is unusable; for UDP/real‑time, enable fast failover.
 
-### Security Integration (ZTNA, IPS, SSL Inspection)
-- Zero Trust: Use identity and device posture to gate access to critical services; SD‑WAN should transport, ZTNA enforces access.  
-- IPS: Place IPS scanning at egress for Internet‑bound threats and at hub sites for east‑west inspection if capacity allows.  
-- SSL Inspection: Use selective (certificate‑based) inspection—exclude sensitive apps and inspect high‑risk destinations.  
-- IPsec/Encryption: For site‑to‑site tunnels, prefer AES‑GCM and modern DH groups; plan for MTU adjustments.
+### Security Integration (ZTNA, IPS, SSL Inspection) 
+- IPS: Place IPS scanning at egress for Internet‑bound threats and at hub sites for east‑west inspection if capacity allows. I've seen banks who push everything through their hub and only place IPS scanning there, but with insider threats/lateral movement being such a large thing, the more you can see the safer you are.
+- SSL Inspection: Use selective (certificate‑based) inspection—exclude sensitive apps and inspect high‑risk destinations. Again, I haven't seen this used much but I would bet it'll be used more in the future. 
+- IPsec/Encryption: For site‑to‑site tunnels, prefer AES‑GCM and modern DH groups. There's zero reason to still use AES128, SHA1, and DH Group 2 now. Tell that vendor they need to upgrade their gear if it doesn't support it.
 
-Example: Create an IPsec template for SD‑WAN members and reference it for site tunnels (GUI: VPN → IPsec Tunnels / CLI similarly).
+Create an IPsec template for SD‑WAN members and reference it for site tunnels (GUI: VPN → IPsec Tunnels / CLI similarly). This will make your life easier when adding new tunnels.
 
 ### Logging and Monitoring
-- Centralize logs: Send logs to FortiAnalyzer or SIEM for retention and correlation.  
+- Centralize logs: Send logs to FortiAnalyzer or SIEM for retention and correlation. Centralized logs will tell you how to fill out that RCA request from two weeks ago when your Fortigate memory is wiped due to Joe rebooting his firewall because Netflix was slow.
 - Monitor SD‑WAN KPIs: per‑link bandwidth, latency/jitter/loss, SLA pass/fail, and session counts.  
 - Dashboards: Use FortiManager/FortiAnalyzer dashboards for multi‑site summary and alerts.  
 
@@ -171,6 +169,7 @@ diagnose debug application icap 255
 - 5. Putting SD‑WAN interfaces in multiple policies with conflicting actions.  
 - 6. No logging or retention policy — without historic SD‑WAN/SLA logs, intermittent failures are impossible to diagnose and capacity trends remain hidden.  
 - 7. Testing only during business hours — miss peak‑time behavior.
+- 8. Single armed SDWAN. This is a big one where people are using SDWAN, with the ability for SDWAN to pull routes from a route table, when there's nothing to fail over to. This causes a full outage if the SLA fails, instead of things just being slow.
 
 ## Validation & Testing (Checklist)
 - Configuration checks:
